@@ -1,0 +1,45 @@
+const fs = require('fs');
+const path = require('path');
+
+class Utils {
+    static logInfo(message) {
+        const logMessage = `[INFO] ${new Date().toISOString()}: ${message}`;
+        console.log(logMessage);
+        Utils.writeLogToFile(logMessage);
+    }
+
+    static logError(message) {
+        const logMessage = `[ERROR] ${new Date().toISOString()}: ${message}`;
+        console.error(logMessage);
+        Utils.writeLogToFile(logMessage);
+    }
+
+    static captureScreenshot(filename) {
+        const screenshotsDir = path.resolve(__dirname, '../screenshots');
+        if (!fs.existsSync(screenshotsDir)) {
+            fs.mkdirSync(screenshotsDir);
+        }
+
+       
+        const screenshotPath = path.join(screenshotsDir, `${filename}.png`);
+        browser.saveScreenshot(screenshotPath);
+        Utils.logInfo(`Screenshot saved to: ${screenshotPath}`);
+    }
+
+    static writeLogToFile(message) {
+        const logFilePath = path.resolve(__dirname, '../logs/test.log');
+        fs.appendFile(logFilePath, `${message}\n`, (err) => {
+            if (err) {
+                console.error(`[ERROR] Failed to write log to file: ${err.message}`);
+            }
+        });
+    }
+
+    static handleException(error, context = 'Unknown Context') {
+        Utils.logError(`Exception in ${context}: ${error.message}`);
+        Utils.captureScreenshot(`error_${new Date().toISOString().replace(/:/g, '-')}`);
+        throw error;  
+    }
+}
+
+module.exports = Utils;
